@@ -34,6 +34,9 @@ public class User implements UserDetails {
   @Enumerated(EnumType.STRING)
   private Role role;
 
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private RefreshToken refreshToken;
+
   @OneToMany(mappedBy = "creator")
   private List<ShortenedURL> urls;
 
