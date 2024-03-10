@@ -1,4 +1,4 @@
-package org.chrenko.andrej.urlshortenerapp.Security.Services;
+package org.chrenko.andrej.urlshortenerapp.Security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -29,18 +29,11 @@ public class CustomJwtAuthenticationEntryPoint implements AuthenticationEntryPoi
       HttpServletResponse response,
       AuthenticationException authException)
       throws IOException, ServletException {
-    // Redirecting unauthorized access through resolver
     resolver.resolveException(request, response, null, authException);
-    // Customize the error message here
     String errorMessage = "Invalid token";
-    // Create a Map to represent the JSON response
     Map<String, String> errorResponse = new HashMap<>();
     errorResponse.put("message", errorMessage);
-
-    // Convert the Map to JSON
     String jsonResponse = objectMapper.writeValueAsString(errorResponse);
-
-    // Set the response status, content type, and write the JSON response to the response
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setContentType("application/json");
     response.getWriter().write(jsonResponse);

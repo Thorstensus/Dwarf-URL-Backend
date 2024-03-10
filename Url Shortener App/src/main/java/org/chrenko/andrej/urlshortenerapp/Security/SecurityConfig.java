@@ -37,14 +37,9 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorizeHttpRequests ->
                 authorizeHttpRequests
-                    .requestMatchers(
-                        "/api/news/**",
-                        "/api/users",
-                        "/api/users/login",
-                        "/api/email-verification/**",
-                        "/api/refresh-token")
-                    .permitAll()
-                    .requestMatchers("/api/admin//**")
+                    //.requestMatchers()
+                    //.permitAll()
+                    .requestMatchers("/api/admin/**")
                     .hasRole("ADMIN")
                     .anyRequest()
                     .authenticated())
