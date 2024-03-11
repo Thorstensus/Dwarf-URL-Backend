@@ -34,7 +34,7 @@ public class ExceptionServiceImpl implements ExceptionService {
       throwEmailUsed();
     } else if (userRepository.existsByUsername(requestDTO.getUsername())) {
       throwUsernameUsed();
-    } else if (requestDTO.getPassword().length() > 8) {
+    } else if (requestDTO.getPassword().length() < 8) {
       throwPasswordTooShort();
     } else if (!isSafePassword(requestDTO.getPassword())) {
       throwPasswordNotSafe();
@@ -51,7 +51,7 @@ public class ExceptionServiceImpl implements ExceptionService {
 
   @Override
   public boolean isSafePassword(String password) {
-    String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$)";
+    String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*$";
     return Pattern.compile(regex).matcher(password).matches();
   }
 
