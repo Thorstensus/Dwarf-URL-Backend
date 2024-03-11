@@ -35,14 +35,4 @@ public class UserServiceImpl implements UserService {
     //todo: logic to send verification email
     return new RegistrationResponseDTO(newUser.getId(), newUser.getEmail(), newUser.getRole() == Role.ADMIN);
   }
-
-  @Override
-  public boolean existsUserByEmail(String email) {
-    return userRepository.existsByEmail(email);
-  }
-
-  @Override
-  public boolean existsUserByUsername(String username) {
-    return userRepository.existsByUsername(username);
-  }
 }

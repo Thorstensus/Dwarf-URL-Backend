@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
+import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
 import org.chrenko.andrej.urlshortenerapp.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,13 @@ import java.util.regex.Pattern;
 @Service
 public class ExceptionServiceImpl implements ExceptionService {
 
-  private final UserService userService;
+  private final UserRepository userRepository;
 
   private final HttpServletRequest httpServletRequest;
 
   @Autowired
-  public ExceptionServiceImpl(UserService userService, HttpServletRequest httpServletRequest) {
-    this.userService = userService;
+  public ExceptionServiceImpl(UserRepository userRepository, HttpServletRequest httpServletRequest) {
+    this.userRepository = userRepository;
     this.httpServletRequest = httpServletRequest;
   }
 
@@ -29,9 +30,9 @@ public class ExceptionServiceImpl implements ExceptionService {
       throwAllFieldsRequired();
     } else if (!isValidEmailAddress(requestDTO.getEmail())) {
       throwNotValidEmailAddress();
-    } else if (userService.existsUserByEmail(requestDTO.getEmail())) {
+    } else if (userRepository.existsByEmail(requestDTO.getEmail())) {
       throwEmailUsed();
-    } else if (userService.existsUserByUsername(requestDTO.getUsername())) {
+    } else if (userRepository.existsByUsername(requestDTO.getUsername())) {
       throwUsernameUsed();
     } else if (requestDTO.getPassword().length() > 8) {
       throwPasswordTooShort();
