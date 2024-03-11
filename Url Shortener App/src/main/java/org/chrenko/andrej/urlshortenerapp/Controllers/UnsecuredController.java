@@ -1,6 +1,6 @@
 package org.chrenko.andrej.urlshortenerapp.Controllers;
 
-import org.chrenko.andrej.urlshortenerapp.DTOs.RegistrationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.chrenko.andrej.urlshortenerapp.DTOs.RegistrationResponseDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationResponseDTO;
 
 @RestController
 @RequestMapping("/api")
