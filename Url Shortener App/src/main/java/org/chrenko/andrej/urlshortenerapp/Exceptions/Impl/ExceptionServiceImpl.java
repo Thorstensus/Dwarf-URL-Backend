@@ -5,10 +5,8 @@ import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestD
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
-import org.chrenko.andrej.urlshortenerapp.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.regex.Pattern;
 
 @Service
