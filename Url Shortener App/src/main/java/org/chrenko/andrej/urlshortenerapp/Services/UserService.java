@@ -6,4 +6,5 @@ import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationResponse
 public interface UserService {
 
   RegistrationResponseDTO registerUser(RegistrationRequestDTO request);
+
 }
