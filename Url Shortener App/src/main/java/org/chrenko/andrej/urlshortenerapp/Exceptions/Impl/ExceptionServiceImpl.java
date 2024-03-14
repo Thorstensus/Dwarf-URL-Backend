@@ -41,10 +41,8 @@ public class ExceptionServiceImpl implements ExceptionService {
 
   @Override
   public boolean isValidEmailAddress(String email) {
-    return Pattern.compile(
-            "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b")
-        .matcher(email)
-        .matches();
+    String regex = "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b";
+    return Pattern.compile(regex).matcher(email).matches();
   }
 
   @Override

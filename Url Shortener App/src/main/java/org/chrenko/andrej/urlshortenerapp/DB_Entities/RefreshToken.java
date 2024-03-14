@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -16,10 +17,8 @@ import java.util.Objects;
 public class RefreshToken {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-
-  private String token;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
   private Date expiryDate;
 
@@ -27,35 +26,8 @@ public class RefreshToken {
   @JoinColumn(name = "user_id")
   private User user;
 
-  public RefreshToken(String token, Date expiryDate, User user) {
-    this.token = token;
+  public RefreshToken(Date expiryDate, User user) {
     this.expiryDate = expiryDate;
     this.user = user;
-  }
-
-  @Override
-  public String toString() {
-    return "RefreshToken{"
-        + "id=" + id
-        + ", token='" + token + '\''
-        + ", expiryDate=" + expiryDate
-        + ", user=" + (user != null ? user.getUsername() : null)
-        + '}';
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof RefreshToken that)) {
-      return false;
-    }
-    return Objects.equals(getId(), that.getId()) && Objects.equals(getToken(), that.getToken()) && Objects.equals(getExpiryDate(), that.getExpiryDate()) && Objects.equals(getUser(), that.getUser());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getId(), getToken(), getExpiryDate(), getUser());
   }
 }
