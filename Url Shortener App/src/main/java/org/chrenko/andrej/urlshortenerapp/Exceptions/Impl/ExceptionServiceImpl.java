@@ -1,12 +1,17 @@
 package org.chrenko.andrej.urlshortenerapp.Exceptions.Impl;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
+import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -16,10 +21,13 @@ public class ExceptionServiceImpl implements ExceptionService {
 
   private final HttpServletRequest httpServletRequest;
 
+  private final PasswordEncoder passwordEncoder;
+
   @Autowired
-  public ExceptionServiceImpl(UserRepository userRepository, HttpServletRequest httpServletRequest) {
+  public ExceptionServiceImpl(UserRepository userRepository, HttpServletRequest httpServletRequest, PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
     this.httpServletRequest = httpServletRequest;
+    this.passwordEncoder = passwordEncoder;
   }
 
   @Override
@@ -36,6 +44,20 @@ public class ExceptionServiceImpl implements ExceptionService {
       throwPasswordTooShort();
     } else if (!isSafePassword(requestDTO.getPassword())) {
       throwPasswordNotSafe();
+    }
+  }
+
+  @Override
+  public void checkForAuthenticationErrors(AuthenticationRequestDTO requestDTO) {
+    if (requestDTO == null || requestDTO.getEmail() == null || requestDTO.getPassword() == null) {
+      throwAllFieldsRequired();;
+    } else if (!isValidEmailAddress(requestDTO.getEmail())) {
+      throwNotValidEmailAddress();
+    } else {
+      Optional<User> foundUser = userRepository.findByEmail(requestDTO.getEmail());
+      if (foundUser.isEmpty() || !passwordEncoder.matches(requestDTO.getPassword(), foundUser.get().getPassword())) {
+        throwUserOrEmailNotMatch();
+      }
     }
   }
 
@@ -80,6 +102,11 @@ public class ExceptionServiceImpl implements ExceptionService {
   @Override
   public void throwPasswordNotSafe() {
     throwException("The password must contain at least one uppercase letter, one lowercase letter, one number and one special character");
+  }
+
+  @Override
+  public void throwUserOrEmailNotMatch() {
+    throwException("The e-mail and password don't match");
   }
 
   @Override
