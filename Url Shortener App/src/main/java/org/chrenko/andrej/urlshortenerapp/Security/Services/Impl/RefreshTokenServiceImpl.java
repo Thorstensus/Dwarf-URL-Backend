@@ -5,6 +5,7 @@ import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessResponseDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
+import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
 import org.chrenko.andrej.urlshortenerapp.Repositories.RefreshTokenRepository;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
 import org.chrenko.andrej.urlshortenerapp.Security.Services.JwtService;
@@ -29,11 +30,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
   private final JwtService jwtService;
 
+  private final ExceptionService exceptionService;
+
   @Autowired
-  public RefreshTokenServiceImpl(RefreshTokenRepository refreshTokenRepository, UserRepository userRepository, JwtService jwtService) {
+  public RefreshTokenServiceImpl(RefreshTokenRepository refreshTokenRepository, UserRepository userRepository, JwtService jwtService, ExceptionService exceptionService) {
     this.refreshTokenRepository = refreshTokenRepository;
     this.userRepository = userRepository;
     this.jwtService = jwtService;
+    this.exceptionService = exceptionService;
   }
 
   @Override
@@ -68,6 +72,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
       token.getUser().setRefreshToken(null);
       userRepository.save(token.getUser());
       deleteRefreshToken(token);
+      exceptionService.throwRefreshTokenExpired(token.getId().toString());
       throw new ApiRequestException("/api/refresh-token",token.getId().toString() + ": Refresh token is expired. Please log in again!");
     }
     return token;
@@ -85,13 +90,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
   @Override
   public RefreshAccessResponseDTO generateNewToken(RefreshAccessRequestDTO requestDTO) {
-    return findByUUID(requestDTO.getUuid())
-        .map(this::verifyExpiration)
-        .map(RefreshToken::getUser)
-        .map(user -> {
-          String accessToken = jwtService.generateToken(user);
-          return new RefreshAccessResponseDTO(requestDTO.getUuid(), accessToken);
-        }).orElseThrow(() -> new ApiRequestException("/api/refresh-token", "Refresh Token does not exist!"));
+    exceptionService.checkForRefreshTokenErrors(requestDTO);
+    RefreshToken refreshToken = refreshTokenRepository.findRefreshTokenById(requestDTO.getUuid()).get();
+    refreshToken = verifyExpiration(refreshToken);
+    User currentUser = refreshToken.getUser();
+    String accessToken = jwtService.generateToken(currentUser);
+    return new RefreshAccessResponseDTO(requestDTO.getUuid(), accessToken);
   }
 
   @Override

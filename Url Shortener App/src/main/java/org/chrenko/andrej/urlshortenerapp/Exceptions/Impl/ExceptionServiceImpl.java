@@ -3,9 +3,11 @@ package org.chrenko.andrej.urlshortenerapp.Exceptions.Impl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
 import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
+import org.chrenko.andrej.urlshortenerapp.Repositories.RefreshTokenRepository;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,11 +25,14 @@ public class ExceptionServiceImpl implements ExceptionService {
 
   private final PasswordEncoder passwordEncoder;
 
+  private final RefreshTokenRepository refreshTokenRepository;
+
   @Autowired
-  public ExceptionServiceImpl(UserRepository userRepository, HttpServletRequest httpServletRequest, PasswordEncoder passwordEncoder) {
+  public ExceptionServiceImpl(UserRepository userRepository, HttpServletRequest httpServletRequest, PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository) {
     this.userRepository = userRepository;
     this.httpServletRequest = httpServletRequest;
     this.passwordEncoder = passwordEncoder;
+    this.refreshTokenRepository = refreshTokenRepository;
   }
 
   @Override
@@ -58,6 +63,13 @@ public class ExceptionServiceImpl implements ExceptionService {
       if (foundUser.isEmpty() || !passwordEncoder.matches(requestDTO.getPassword(), foundUser.get().getPassword())) {
         throwUserOrEmailNotMatch();
       }
+    }
+  }
+
+  @Override
+  public void checkForRefreshTokenErrors(RefreshAccessRequestDTO requestDTO) {
+    if (refreshTokenRepository.findRefreshTokenById(requestDTO.getUuid()).isEmpty()) {
+      throwRefreshTokenNotExists();
     }
   }
 
@@ -107,6 +119,16 @@ public class ExceptionServiceImpl implements ExceptionService {
   @Override
   public void throwUserOrEmailNotMatch() {
     throwException("The e-mail and password don't match");
+  }
+
+  @Override
+  public void throwRefreshTokenNotExists() {
+    throwException("Refresh Token does not exist");
+  }
+
+  @Override
+  public void throwRefreshTokenExpired(String id) {
+    throwException(id + "Refresh token is expired, please log in again");
   }
 
   @Override
