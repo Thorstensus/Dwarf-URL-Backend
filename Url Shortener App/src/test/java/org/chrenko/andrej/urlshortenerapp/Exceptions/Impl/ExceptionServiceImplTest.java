@@ -1,6 +1,8 @@
 package org.chrenko.andrej.urlshortenerapp.Exceptions.Impl;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
+import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
@@ -11,6 +13,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -21,6 +26,8 @@ class ExceptionServiceImplTest {
   @Mock UserRepository userRepository;
 
   @Mock HttpServletRequest httpServletRequest;
+
+  @Mock PasswordEncoder passwordEncoder;
   @InjectMocks ExceptionServiceImpl exceptionService;
 
   @Test
@@ -90,6 +97,50 @@ class ExceptionServiceImplTest {
   }
 
   @Test
+  void checkForAuthenticationErrorsDetectsUsernamePasswordMismatch_Email_not_registered() {
+    AuthenticationRequestDTO sampleLogin = new AuthenticationRequestDTO(
+        "falsemail@sample.com",
+        "truepassword");
+
+    ApiRequestException expectedException = new ApiRequestException(
+        "/api/test",
+        "The e-mail and password don't match");
+
+    when(userRepository.findByEmail(sampleLogin.getEmail())).thenReturn(Optional.empty());
+
+    ApiRequestException actualException = assertThrows(
+        ApiRequestException.class, () -> {
+          exceptionService.checkForAuthenticationErrors(sampleLogin);
+        }
+    );
+    assertEquals(expectedException.getMessage(), actualException.getMessage());
+  }
+
+  @Test
+  void checkForAuthenticationErrorsDetectsUsernamePasswordMismatch_Wrong_Password() {
+    AuthenticationRequestDTO sampleLogin = new AuthenticationRequestDTO(
+        "truemail@sample.com",
+        "wrongpassword");
+
+    ApiRequestException expectedException = new ApiRequestException(
+        "/api/test",
+        "The e-mail and password don't match");
+
+    User sampleUser = new User("John Doe", "truemail@sample.com", "truepassword");
+
+    when(userRepository.findByEmail(sampleLogin.getEmail())).thenReturn(Optional.of(sampleUser));
+
+    when(passwordEncoder.matches(sampleLogin.getPassword(), sampleUser.getPassword())).thenReturn(false);
+
+    ApiRequestException actualException = assertThrows(
+        ApiRequestException.class, () -> {
+          exceptionService.checkForAuthenticationErrors(sampleLogin);
+        }
+    );
+    assertEquals(expectedException.getMessage(), actualException.getMessage());
+  }
+
+  @Test
   void isValidEmailAddressDetectsInvalidEmail() {
     String wrongEmail = "wrongemail.com";
     assertFalse(exceptionService.isValidEmailAddress(wrongEmail));
@@ -112,4 +163,5 @@ class ExceptionServiceImplTest {
     String strongPassword = "Strong234!";
     assertTrue(exceptionService.isSafePassword(strongPassword));
   }
+
 }
