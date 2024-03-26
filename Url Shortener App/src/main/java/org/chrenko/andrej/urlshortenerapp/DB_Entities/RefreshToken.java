@@ -30,4 +30,13 @@ public class RefreshToken {
     this.expiryDate = expiryDate;
     this.user = user;
   }
+
+  @Override
+  public String toString() {
+    return "RefreshToken{" +
+        "id=" + id +
+        ", expiryDate=" + expiryDate +
+        ", user=" + user.getUsername() +
+        '}';
+  }
 }

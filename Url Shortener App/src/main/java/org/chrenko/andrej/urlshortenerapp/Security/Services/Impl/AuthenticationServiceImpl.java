@@ -2,8 +2,8 @@ package org.chrenko.andrej.urlshortenerapp.Security.Services.Impl;
 
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.RefreshToken;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
-import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationRequestDTO;
-import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationResponseDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationResponseDTO;
 import org.chrenko.andrej.urlshortenerapp.Enum.Role;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
@@ -60,7 +60,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     RefreshToken refreshToken;
 
     if (authenticatedUser.getRefreshToken() == null) {
-      refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getEmail());
+      refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getUsername());
       refreshTokenService.saveRefreshToken(refreshToken);
     } else {
       refreshToken = authenticatedUser.getRefreshToken();

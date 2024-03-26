@@ -2,13 +2,15 @@ package org.chrenko.andrej.urlshortenerapp.Exceptions.Impl;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
-import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
 import org.chrenko.andrej.urlshortenerapp.Repositories.RefreshTokenRepository;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
+import org.chrenko.andrej.urlshortenerapp.Security.Services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,23 +29,26 @@ public class ExceptionServiceImpl implements ExceptionService {
 
   private final RefreshTokenRepository refreshTokenRepository;
 
+  private final JwtService jwtService;
+
   @Autowired
-  public ExceptionServiceImpl(UserRepository userRepository, HttpServletRequest httpServletRequest, PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository) {
+  public ExceptionServiceImpl(UserRepository userRepository, HttpServletRequest httpServletRequest, PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository, JwtService jwtService) {
     this.userRepository = userRepository;
     this.httpServletRequest = httpServletRequest;
     this.passwordEncoder = passwordEncoder;
     this.refreshTokenRepository = refreshTokenRepository;
+    this.jwtService = jwtService;
   }
 
   @Override
   public void checkForRegisterErrors(RegistrationRequestDTO requestDTO) {
-    if (requestDTO == null || requestDTO.getPassword() == null || requestDTO.getUsername() == null || requestDTO.getEmail() == null) {
+    if (requestDTO == null || requestDTO.getPassword() == null || requestDTO.getName() == null || requestDTO.getEmail() == null) {
       throwAllFieldsRequired();
     } else if (!isValidEmailAddress(requestDTO.getEmail())) {
       throwNotValidEmailAddress();
     } else if (userRepository.existsByEmail(requestDTO.getEmail())) {
       throwEmailUsed();
-    } else if (userRepository.existsByUsername(requestDTO.getUsername())) {
+    } else if (userRepository.existsByName(requestDTO.getName())) {
       throwUsernameUsed();
     } else if (requestDTO.getPassword().length() < 8) {
       throwPasswordTooShort();
@@ -74,6 +79,15 @@ public class ExceptionServiceImpl implements ExceptionService {
   }
 
   @Override
+  public void checkForCreateShortenedUrlErrors(ShortenedUrlRequestDTO requestDTO, String jwtToken) {
+    if (userRepository.findByEmail(jwtService.extractUsername(jwtToken)).isEmpty()) {
+      throwJwtTokenInvalid();
+    } else if (!isValidLink(requestDTO.getLongUrl())) {
+      throwInvalidLink();
+    }
+  }
+
+  @Override
   public boolean isValidEmailAddress(String email) {
     String regex = "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b";
     return Pattern.compile(regex).matcher(email).matches();
@@ -83,6 +97,12 @@ public class ExceptionServiceImpl implements ExceptionService {
   public boolean isSafePassword(String password) {
     String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*$";
     return Pattern.compile(regex).matcher(password).matches();
+  }
+
+  @Override
+  public boolean isValidLink(String link) {
+    String regex = "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(\\S*)$";
+    return Pattern.compile(regex).matcher(link).matches();
   }
 
   @Override
@@ -129,6 +149,16 @@ public class ExceptionServiceImpl implements ExceptionService {
   @Override
   public void throwRefreshTokenExpired(String id) {
     throwException(id + "Refresh token is expired, please log in again");
+  }
+
+  @Override
+  public void throwJwtTokenInvalid() {
+    throwException("Unknown Error: Invalid Token");
+  }
+
+  @Override
+  public void throwInvalidLink() {
+    throwException("Please input a valid link");
   }
 
   @Override

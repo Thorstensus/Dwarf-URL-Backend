@@ -2,8 +2,8 @@ package org.chrenko.andrej.urlshortenerapp.Security.Services.Impl;
 
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.RefreshToken;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
-import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationRequestDTO;
-import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationResponseDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationResponseDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
 import org.chrenko.andrej.urlshortenerapp.Security.Services.JwtService;

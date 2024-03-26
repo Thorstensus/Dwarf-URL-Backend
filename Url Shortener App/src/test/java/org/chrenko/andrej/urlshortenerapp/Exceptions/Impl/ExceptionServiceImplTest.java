@@ -2,12 +2,10 @@ package org.chrenko.andrej.urlshortenerapp.Exceptions.Impl;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
-import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
-import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

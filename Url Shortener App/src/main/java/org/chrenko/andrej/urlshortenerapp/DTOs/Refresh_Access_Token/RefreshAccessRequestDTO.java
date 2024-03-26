@@ -12,5 +12,4 @@ import java.util.UUID;
 public class RefreshAccessRequestDTO {
 
   private UUID uuid;
-
 }

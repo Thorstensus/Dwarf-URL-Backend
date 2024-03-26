@@ -1,7 +1,7 @@
 package org.chrenko.andrej.urlshortenerapp.Controllers;
 
-import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationRequestDTO;
-import org.chrenko.andrej.urlshortenerapp.DTOs.AuthenticationResponseDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationResponseDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessResponseDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;

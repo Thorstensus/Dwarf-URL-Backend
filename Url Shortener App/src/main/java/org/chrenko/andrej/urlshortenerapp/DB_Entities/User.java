@@ -1,9 +1,7 @@
 package org.chrenko.andrej.urlshortenerapp.DB_Entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.chrenko.andrej.urlshortenerapp.Enum.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,8 +24,7 @@ public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
-  private String username;
+  private String name;
   private String email;
   private String password;
 
@@ -40,8 +37,8 @@ public class User implements UserDetails {
   @OneToMany(mappedBy = "creator")
   private List<ShortenedURL> urls;
 
-  public User(String username, String email, String password) {
-    this.username = username;
+  public User(String name, String email, String password) {
+    this.name = name;
     this.email = email;
     this.password = password;
     this.role = Role.USER;
@@ -64,7 +61,7 @@ public class User implements UserDetails {
 
   @Override
   public String getUsername() {
-    return username;
+    return email;
   }
 
   @Override
@@ -85,5 +82,23 @@ public class User implements UserDetails {
   @Override
   public boolean isEnabled() {
     return enabled;
+  }
+
+  @Override
+  public String toString() {
+    return "User{" +
+        "enabled=" + enabled +
+        ", locked=" + locked +
+        ", verified=" + verified +
+        ", nonExpired=" + nonExpired +
+        ", credentialsNonExpired=" + credentialsNonExpired +
+        ", id=" + id +
+        ", name='" + name + '\'' +
+        ", email='" + email + '\'' +
+        ", password='" + password + '\'' +
+        ", role=" + role +
+        ", refreshToken=" + refreshToken.getId() +
+        ", urls=" + urls +
+        '}';
   }
 }

@@ -1,4 +1,4 @@
-package org.chrenko.andrej.urlshortenerapp.DTOs;
+package org.chrenko.andrej.urlshortenerapp.DTOs.Authentication;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

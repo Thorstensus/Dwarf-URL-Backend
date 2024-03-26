@@ -12,7 +12,7 @@ import org.chrenko.andrej.urlshortenerapp.DTOs.Abstract.RequestDTO;
 @NoArgsConstructor
 public class RegistrationRequestDTO extends RequestDTO {
 
-  private String username;
+  private String name;
 
   private String email;
 
