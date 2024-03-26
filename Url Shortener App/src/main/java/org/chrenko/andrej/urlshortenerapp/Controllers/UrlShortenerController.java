@@ -1,5 +1,6 @@
 package org.chrenko.andrej.urlshortenerapp.Controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Security.Services.JwtService;
 import org.chrenko.andrej.urlshortenerapp.Services.UrlShortenerService;
@@ -30,9 +31,11 @@ public class UrlShortenerController {
   }
 
   @GetMapping("/{code}")
-  public ResponseEntity<Object> redirectToRealUrl(@PathVariable String code) {
+  public ResponseEntity<Object> redirectToRealUrl(@PathVariable String code, HttpServletRequest servletRequest) {
     return ResponseEntity.status(302)
-        .header("Location", urlShortenerService.getRealUrl(code))
+        .header("Location", urlShortenerService.redirectToRealUrl(code, servletRequest))
         .build();
   }
+
+  //todo delete endpoint
 }

@@ -1,11 +1,14 @@
 package org.chrenko.andrej.urlshortenerapp.Services.Impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.ShortenedURL;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
+import org.chrenko.andrej.urlshortenerapp.DB_Entities.Visit;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlResponseDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
 import org.chrenko.andrej.urlshortenerapp.Repositories.ShortenedURLRepository;
+import org.chrenko.andrej.urlshortenerapp.Repositories.VisitRepository;
 import org.chrenko.andrej.urlshortenerapp.Services.UrlShortenerService;
 import org.chrenko.andrej.urlshortenerapp.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +26,13 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
 
   private final ExceptionService exceptionService;
 
+  private final VisitRepository visitRepository;
   @Autowired
-  public UrlShortenerServiceImpl(ShortenedURLRepository shortenedURLRepository, UserService userService, ExceptionService exceptionService) {
+  public UrlShortenerServiceImpl(ShortenedURLRepository shortenedURLRepository, UserService userService, ExceptionService exceptionService, VisitRepository visitRepository) {
     this.shortenedURLRepository = shortenedURLRepository;
     this.userService = userService;
     this.exceptionService = exceptionService;
+    this.visitRepository = visitRepository;
   }
 
   @Override
@@ -42,12 +47,14 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
   }
 
   @Override
-  public String getRealUrl(String code) {
+  public String redirectToRealUrl(String code, HttpServletRequest servletRequest) {
     try {
       UUID uuid = Base62.decodeUUID(code);
-      Optional<ShortenedURL> url = shortenedURLRepository.findById(uuid);
-      if (url.isPresent()) {
-        return url.get().getLink();
+      Optional<ShortenedURL> urlOptional = shortenedURLRepository.findById(uuid);
+      if (urlOptional.isPresent()) {
+        Visit newVisit = new Visit(servletRequest.getRemoteAddr(), urlOptional.get());
+        visitRepository.save(newVisit);
+        return urlOptional.get().getLink();
       } else {
         return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
       }

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -12,10 +14,13 @@ import lombok.NoArgsConstructor;
 public class Visit {
 
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
   @Column(name = "ip_address")
   private String ip;
 
-  private int count;
+  private LocalDateTime time;
 
   @ManyToOne
   @JoinColumn(name = "url_code", nullable = false)
@@ -24,6 +29,7 @@ public class Visit {
   public Visit(String ip, ShortenedURL shortenedURL) {
     this.ip = ip;
     this.shortenedURL = shortenedURL;
-    this.count = 1;
+    this.time = LocalDateTime.now();
   }
+
 }
