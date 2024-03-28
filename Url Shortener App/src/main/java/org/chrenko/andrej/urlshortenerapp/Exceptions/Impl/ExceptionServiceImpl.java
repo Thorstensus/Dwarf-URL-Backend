@@ -5,10 +5,12 @@ import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.DeleteShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
 import org.chrenko.andrej.urlshortenerapp.Repositories.RefreshTokenRepository;
+import org.chrenko.andrej.urlshortenerapp.Repositories.ShortenedURLRepository;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
 import org.chrenko.andrej.urlshortenerapp.Security.Services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Service
@@ -31,13 +34,16 @@ public class ExceptionServiceImpl implements ExceptionService {
 
   private final JwtService jwtService;
 
+  private final ShortenedURLRepository shortenedURLRepository;
+
   @Autowired
-  public ExceptionServiceImpl(UserRepository userRepository, HttpServletRequest httpServletRequest, PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository, JwtService jwtService) {
+  public ExceptionServiceImpl(UserRepository userRepository, HttpServletRequest httpServletRequest, PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository, JwtService jwtService, ShortenedURLRepository shortenedURLRepository) {
     this.userRepository = userRepository;
     this.httpServletRequest = httpServletRequest;
     this.passwordEncoder = passwordEncoder;
     this.refreshTokenRepository = refreshTokenRepository;
     this.jwtService = jwtService;
+    this.shortenedURLRepository = shortenedURLRepository;
   }
 
   @Override
@@ -84,6 +90,16 @@ public class ExceptionServiceImpl implements ExceptionService {
       throwJwtTokenInvalid();
     } else if (!isValidLink(requestDTO.getLongUrl())) {
       throwInvalidLink();
+    }
+  }
+
+  @Override
+  public void checkForDeleteShortenedUrlErrors(DeleteShortenedUrlRequestDTO requestDTO, String jwtToken) {
+    if (userRepository.findByEmail(jwtService.extractUsername(jwtToken)).isEmpty()) {
+      throwJwtTokenInvalid();
+    } else if (shortenedURLRepository.findById(UUID.fromString(requestDTO.getShortenedUrlId())).isEmpty()
+        || !shortenedURLRepository.findById(UUID.fromString(requestDTO.getShortenedUrlId())).get().getCreator().equals((userRepository.findByEmail(jwtService.extractUsername(jwtToken)).get()))) {
+      throwLinkNotAccessible();
     }
   }
 
@@ -162,7 +178,13 @@ public class ExceptionServiceImpl implements ExceptionService {
   }
 
   @Override
+  public void throwLinkNotAccessible() {
+    throwException("Only links created by you can be deleted");
+  }
+
+  @Override
   public void throwException(String message) {
     throw new ApiRequestException(httpServletRequest.getRequestURI(), message);
   }
+
 }

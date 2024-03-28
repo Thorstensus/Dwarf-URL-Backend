@@ -3,6 +3,7 @@ package org.chrenko.andrej.urlshortenerapp.Exceptions;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.DeleteShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlRequestDTO;
 
 public interface ExceptionService {
@@ -13,6 +14,8 @@ public interface ExceptionService {
   void checkForRefreshTokenErrors(RefreshAccessRequestDTO requestDTO);
 
   void checkForCreateShortenedUrlErrors(ShortenedUrlRequestDTO requestDTO, String jwtToken);
+
+  void checkForDeleteShortenedUrlErrors(DeleteShortenedUrlRequestDTO requestDTO, String jwtToken);
 
   boolean isValidEmailAddress(String email);
 
@@ -41,6 +44,8 @@ public interface ExceptionService {
   void throwJwtTokenInvalid();
 
   void throwInvalidLink();
+
+  void throwLinkNotAccessible();
 
   void throwException(String message);
 }

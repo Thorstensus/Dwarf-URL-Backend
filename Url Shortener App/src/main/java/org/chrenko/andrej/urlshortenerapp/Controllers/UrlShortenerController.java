@@ -1,7 +1,9 @@
 package org.chrenko.andrej.urlshortenerapp.Controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.DeleteShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlResponseDTO;
 import org.chrenko.andrej.urlshortenerapp.Security.Services.JwtService;
 import org.chrenko.andrej.urlshortenerapp.Services.UrlShortenerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,18 +26,23 @@ public class UrlShortenerController {
   }
 
   @PostMapping("/shorten")
-  public ResponseEntity<Object> createShortenedUrl(@RequestBody ShortenedUrlRequestDTO requestDTO,
-                                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String requestHeader) {
+  public ResponseEntity<ShortenedUrlResponseDTO> createShortenedUrl(@RequestBody ShortenedUrlRequestDTO requestDTO,
+                                                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String requestHeader) {
     return ResponseEntity.status(200).body(urlShortenerService.createShortenedUrl(requestDTO,
         jwtService.extractBearerToken(requestHeader)));
   }
 
   @GetMapping("/{code}")
-  public ResponseEntity<Object> redirectToRealUrl(@PathVariable String code, HttpServletRequest servletRequest) {
+  public ResponseEntity<String> redirectToRealUrl(@PathVariable String code, HttpServletRequest servletRequest) {
     return ResponseEntity.status(302)
         .header("Location", urlShortenerService.redirectToRealUrl(code, servletRequest))
         .build();
   }
 
-  //todo delete endpoint
+  @DeleteMapping("/delete")
+  public ResponseEntity<String> deleteShortenedUrl(@RequestBody DeleteShortenedUrlRequestDTO requestDTO, @RequestHeader(HttpHeaders.AUTHORIZATION) String requestHeader) {
+    return ResponseEntity.status(200).body(urlShortenerService.deleteShortenedUrl(requestDTO, jwtService.extractBearerToken(requestHeader)));
+  }
+
+  //todo mail sending, link expiration
 }

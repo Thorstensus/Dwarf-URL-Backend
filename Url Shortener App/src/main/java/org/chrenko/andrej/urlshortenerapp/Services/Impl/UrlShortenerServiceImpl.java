@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.ShortenedURL;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.Visit;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.DeleteShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlResponseDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
@@ -61,6 +62,14 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
     } catch (IllegalArgumentException e) {
       return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
     }
+  }
+
+  @Override
+  public String deleteShortenedUrl(DeleteShortenedUrlRequestDTO requestDTO, String jwtToken) {
+    exceptionService.checkForDeleteShortenedUrlErrors(requestDTO, jwtToken);
+    ShortenedURL urlToDelete = shortenedURLRepository.findById(UUID.fromString(requestDTO.getShortenedUrlId())).get();
+    shortenedURLRepository.delete(urlToDelete);
+    return "Successfully deleted";
   }
 
 }

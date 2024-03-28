@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +33,7 @@ public class ShortenedURL {
   private User creator;
 
   @OneToMany(mappedBy = "shortenedURL")
+  @Cascade(CascadeType.DELETE_ORPHAN)
   private List<Visit> clicks;
 
   public ShortenedURL() {
