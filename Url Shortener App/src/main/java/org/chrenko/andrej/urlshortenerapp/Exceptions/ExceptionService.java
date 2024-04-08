@@ -17,6 +17,8 @@ public interface ExceptionService {
 
   void checkForDeleteShortenedUrlErrors(DeleteShortenedUrlRequestDTO requestDTO, String jwtToken);
 
+  void checkForVerifyEmailErrors(String token);
+
   boolean isValidEmailAddress(String email);
 
   boolean isSafePassword(String password);
@@ -46,6 +48,10 @@ public interface ExceptionService {
   void throwInvalidLink();
 
   void throwLinkNotAccessible();
+
+  void throwUsernameNotFound();
+
+  void throwUserAlreadyVerified();
 
   void throwException(String message);
 }

@@ -43,6 +43,4 @@ public class UrlShortenerController {
   public ResponseEntity<String> deleteShortenedUrl(@RequestBody DeleteShortenedUrlRequestDTO requestDTO, @RequestHeader(HttpHeaders.AUTHORIZATION) String requestHeader) {
     return ResponseEntity.status(200).body(urlShortenerService.deleteShortenedUrl(requestDTO, jwtService.extractBearerToken(requestHeader)));
   }
-
-  //todo mail sending, link expiration
 }

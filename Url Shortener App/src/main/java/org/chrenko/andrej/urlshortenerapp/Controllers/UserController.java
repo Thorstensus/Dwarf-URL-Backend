@@ -10,10 +10,7 @@ import org.chrenko.andrej.urlshortenerapp.Security.Services.RefreshTokenService;
 import org.chrenko.andrej.urlshortenerapp.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationResponseDTO;
 
 @RestController
@@ -46,5 +43,10 @@ public class UserController {
   @PostMapping("/refresh-token")
   public ResponseEntity<RefreshAccessResponseDTO> refreshAccessToken(@RequestBody RefreshAccessRequestDTO requestDTO) {
     return ResponseEntity.status(200).body(refreshTokenService.generateNewToken(requestDTO));
+  }
+
+  @GetMapping("/verification/{token}")
+  public ResponseEntity<String> verifyEmail(@PathVariable String token) {
+    return ResponseEntity.status(200).body(userService.verifyMail(token));
   }
 }

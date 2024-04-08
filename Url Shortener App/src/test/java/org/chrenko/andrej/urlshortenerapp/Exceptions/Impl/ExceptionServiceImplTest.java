@@ -68,7 +68,7 @@ class ExceptionServiceImplTest {
     ApiRequestException expectedException = new ApiRequestException("/api/test", "The entered username is already in use");
 
     when(httpServletRequest.getRequestURI()).thenReturn("/api/test");
-    when(userRepository.existsByUsername(mockRequest.getUsername())).thenReturn(true);
+    when(userRepository.existsByName(mockRequest.getName())).thenReturn(true);
 
     ApiRequestException actualException = assertThrows(
         ApiRequestException.class, () -> {

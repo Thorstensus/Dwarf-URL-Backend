@@ -104,6 +104,16 @@ public class ExceptionServiceImpl implements ExceptionService {
   }
 
   @Override
+  public void checkForVerifyEmailErrors(String token) {
+    Optional<User> user = userRepository.findByEmail(jwtService.extractUsername(token));
+    if (user.isEmpty()) {
+      throwUsernameNotFound();
+    } else if (user.get().isVerified()) {
+      throwUserAlreadyVerified();
+    }
+  }
+
+  @Override
   public boolean isValidEmailAddress(String email) {
     String regex = "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b";
     return Pattern.compile(regex).matcher(email).matches();
@@ -182,6 +192,15 @@ public class ExceptionServiceImpl implements ExceptionService {
     throwException("Only links created by you can be deleted");
   }
 
+  @Override
+  public void throwUsernameNotFound() {
+    throwException("User not found.");
+  }
+
+  @Override
+  public void throwUserAlreadyVerified() {
+    throwException("User has already been verified.");
+  }
   @Override
   public void throwException(String message) {
     throw new ApiRequestException(httpServletRequest.getRequestURI(), message);

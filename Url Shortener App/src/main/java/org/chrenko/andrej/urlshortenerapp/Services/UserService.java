@@ -10,7 +10,7 @@ public interface UserService {
 
   RegistrationResponseDTO registerUser(RegistrationRequestDTO request);
 
-  Optional<User> findUserById(Long id);
-
   Optional<User> extractUserFromToken(String token);
+
+  String verifyMail(String token);
 }
