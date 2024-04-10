@@ -1,6 +1,8 @@
 package org.chrenko.andrej.urlshortenerapp.Controllers;
 
-import org.chrenko.andrej.urlshortenerapp.DTOs.UserStatPageDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.LinkStats.LinkStatPageDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UserStats.UserStatPageDTO;
+import org.chrenko.andrej.urlshortenerapp.Services.ShortenedURLService;
 import org.chrenko.andrej.urlshortenerapp.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +19,24 @@ public class AdminController {
 
   private final UserService userService;
 
-  @Autowired
-  public AdminController(UserService userService) {
-    this.userService = userService;
-  }
+  private final ShortenedURLService shortenedURLService;
 
+  @Autowired
+  public AdminController(UserService userService, ShortenedURLService shortenedURLService) {
+    this.userService = userService;
+    this.shortenedURLService = shortenedURLService;
+  }
 
   @GetMapping("/user-stats")
   public ResponseEntity<UserStatPageDTO> getUserStatistics(
       @RequestParam(required = false, defaultValue = "1") String page) {
     return ResponseEntity.status(200).body(userService.getUserStats(Integer.parseInt(page)));
   }
-  //TODO: view users with most clicks, view links with most clicks
+
+  @GetMapping("/link-stats")
+  public ResponseEntity<LinkStatPageDTO> getLinkStatistics(
+      @RequestParam(required = false, defaultValue = "1") String page) {
+    return ResponseEntity.status(200).body(shortenedURLService.getLinkStats(Integer.parseInt(page)));
+  }
+  //TODO: view links with most clicks
 }
