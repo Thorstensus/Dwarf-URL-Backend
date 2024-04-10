@@ -1,8 +1,11 @@
 package org.chrenko.andrej.urlshortenerapp.Services.Impl;
 
+import org.chrenko.andrej.urlshortenerapp.DB_Entities.ShortenedURL;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationResponseDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UserStatDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UserStatPageDTO;
 import org.chrenko.andrej.urlshortenerapp.Email.EmailService;
 import org.chrenko.andrej.urlshortenerapp.Enum.Role;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.ExceptionService;
@@ -10,9 +13,14 @@ import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
 import org.chrenko.andrej.urlshortenerapp.Security.Services.JwtService;
 import org.chrenko.andrej.urlshortenerapp.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -58,6 +66,27 @@ public class UserServiceImpl implements UserService {
     user.setVerified(true);
     userRepository.save(user);
     return "Account has been verified";
+  }
+
+  @Override
+  public UserStatPageDTO getUserStats(Integer page) {
+    exceptionService.checkForUserStatsErrors(page);
+    int realPageIndex = page - 1;
+    List<UserStatDTO> userStats = new ArrayList<>();
+    Pageable pageable = PageRequest.of(realPageIndex, 10);
+    Page<User> users = userRepository.findAllByTotalClicksDesc(pageable);
+    Long userRank = realPageIndex * 10L + 1;
+    for (User user : users) {
+      List<ShortenedURL> currentUserUrls = user.getUrls();
+      Long clickCount = 0L;
+      for (ShortenedURL url : currentUserUrls) {
+        clickCount += url.getClicks().size();
+      }
+      UserStatDTO currentUserStat = new UserStatDTO(userRank, user.getId(), user.getUsername(), clickCount);
+      userStats.add(currentUserStat);
+      userRank++;
+    }
+    return new UserStatPageDTO(userStats);
   }
 
 }

@@ -19,6 +19,8 @@ public interface ExceptionService {
 
   void checkForVerifyEmailErrors(String token);
 
+  void checkForUserStatsErrors(Integer page);
+
   boolean isValidEmailAddress(String email);
 
   boolean isSafePassword(String password);
