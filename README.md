@@ -6,4 +6,4 @@ The intended functionality of this app is already finished.
 TODO:
 
 - Implement tests
-- Documentation
+
