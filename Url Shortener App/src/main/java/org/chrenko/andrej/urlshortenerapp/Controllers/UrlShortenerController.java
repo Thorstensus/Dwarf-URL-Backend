@@ -1,5 +1,6 @@
 package org.chrenko.andrej.urlshortenerapp.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.DeleteShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlRequestDTO;
@@ -25,6 +26,7 @@ public class UrlShortenerController {
     this.jwtService = jwtService;
   }
 
+  @Operation(summary = "Endpoint used for creating the shortened URLs themselves.")
   @PostMapping("/shorten")
   public ResponseEntity<ShortenedUrlResponseDTO> createShortenedUrl(@RequestBody ShortenedUrlRequestDTO requestDTO,
                                                                     @RequestHeader(HttpHeaders.AUTHORIZATION) String requestHeader) {
@@ -32,6 +34,7 @@ public class UrlShortenerController {
         jwtService.extractBearerToken(requestHeader)));
   }
 
+  @Operation(summary = "All generated shortened URLs are accessed through this endpoint.")
   @GetMapping("/{code}")
   public ResponseEntity<String> redirectToRealUrl(@PathVariable String code, HttpServletRequest servletRequest) {
     return ResponseEntity.status(302)
@@ -39,6 +42,7 @@ public class UrlShortenerController {
         .build();
   }
 
+  @Operation(summary = "This endpoint allows users to delete their created URLs.")
   @DeleteMapping("/delete")
   public ResponseEntity<String> deleteShortenedUrl(@RequestBody DeleteShortenedUrlRequestDTO requestDTO, @RequestHeader(HttpHeaders.AUTHORIZATION) String requestHeader) {
     return ResponseEntity.status(200).body(urlShortenerService.deleteShortenedUrl(requestDTO, jwtService.extractBearerToken(requestHeader)));

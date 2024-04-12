@@ -42,7 +42,8 @@ public class SecurityConfig {
                         "/api/users/login",
                         "/api/users/refresh-token",
                         "/api/urls/**",
-                        "/api/users/verification/**")
+                        "/api/users/verification/**",
+                        "/swagger/**")
                     .permitAll()
                     .requestMatchers("/api/urls/shorten")
                     .authenticated()

@@ -1,5 +1,6 @@
 package org.chrenko.andrej.urlshortenerapp.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationResponseDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessRequestDTO;
@@ -30,21 +31,25 @@ public class UserController {
     this.refreshTokenService = refreshTokenService;
   }
 
+  @Operation(summary = "Endpoint used for registering new users.")
   @PostMapping("/register")
   public ResponseEntity<RegistrationResponseDTO> registerUser(@RequestBody RegistrationRequestDTO requestDTO) {
     return ResponseEntity.status(200).body(userService.registerUser(requestDTO));
   }
 
+  @Operation(summary = "Endpoint used for login which generates an access token and refresh token.")
   @PostMapping("/login")
   public ResponseEntity<AuthenticationResponseDTO> authenticateUser(@RequestBody AuthenticationRequestDTO requestDTO) {
     return ResponseEntity.status(200).body(authenticationService.authenticateUser(requestDTO));
   }
 
+  @Operation(summary = "Endpoint which generates a new access token if the sent refresh token is valid.")
   @PostMapping("/refresh-token")
   public ResponseEntity<RefreshAccessResponseDTO> refreshAccessToken(@RequestBody RefreshAccessRequestDTO requestDTO) {
     return ResponseEntity.status(200).body(refreshTokenService.generateNewToken(requestDTO));
   }
 
+  @Operation(summary = "Endpoint which serves for email validation. A new verification token is generated after registration.")
   @GetMapping("/verification/{token}")
   public ResponseEntity<String> verifyEmail(@PathVariable String token) {
     return ResponseEntity.status(200).body(userService.verifyMail(token));

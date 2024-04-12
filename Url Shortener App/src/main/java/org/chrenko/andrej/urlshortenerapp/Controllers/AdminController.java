@@ -1,5 +1,6 @@
 package org.chrenko.andrej.urlshortenerapp.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.chrenko.andrej.urlshortenerapp.DTOs.LinkStats.LinkStatPageDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.UserStats.UserStatPageDTO;
 import org.chrenko.andrej.urlshortenerapp.Services.ShortenedURLService;
@@ -27,16 +28,17 @@ public class AdminController {
     this.shortenedURLService = shortenedURLService;
   }
 
+  @Operation(summary = "Endpoint which ranks the users by their total shortened link clicks. The results are paginated with 10 results loaded per page.")
   @GetMapping("/user-stats")
   public ResponseEntity<UserStatPageDTO> getUserStatistics(
       @RequestParam(required = false, defaultValue = "1") String page) {
     return ResponseEntity.status(200).body(userService.getUserStats(Integer.parseInt(page)));
   }
 
+  @Operation(summary = "Endpoint which ranks the shortened links by their visit count. The results are paginated with 10 results loaded per page.")
   @GetMapping("/link-stats")
   public ResponseEntity<LinkStatPageDTO> getLinkStatistics(
       @RequestParam(required = false, defaultValue = "1") String page) {
     return ResponseEntity.status(200).body(shortenedURLService.getLinkStats(Integer.parseInt(page)));
   }
-  //TODO: view links with most clicks
 }
