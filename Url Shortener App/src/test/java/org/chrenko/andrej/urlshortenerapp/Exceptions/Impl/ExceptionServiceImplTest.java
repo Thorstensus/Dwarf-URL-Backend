@@ -3,9 +3,15 @@ package org.chrenko.andrej.urlshortenerapp.Exceptions.Impl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.chrenko.andrej.urlshortenerapp.DB_Entities.User;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Authentication.AuthenticationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.Refresh_Access_Token.RefreshAccessRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.DTOs.Registration.RegistrationRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.DeleteShortenedUrlRequestDTO;
+import org.chrenko.andrej.urlshortenerapp.DTOs.UrlShortener.ShortenedUrlRequestDTO;
 import org.chrenko.andrej.urlshortenerapp.Exceptions.DTOs.ApiRequestException;
+import org.chrenko.andrej.urlshortenerapp.Repositories.RefreshTokenRepository;
+import org.chrenko.andrej.urlshortenerapp.Repositories.ShortenedURLRepository;
 import org.chrenko.andrej.urlshortenerapp.Repositories.UserRepository;
+import org.chrenko.andrej.urlshortenerapp.Security.Services.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,8 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +34,14 @@ class ExceptionServiceImplTest {
   @Mock HttpServletRequest httpServletRequest;
 
   @Mock PasswordEncoder passwordEncoder;
+
+  @Mock JwtService jwtService;
+
+  @Mock RefreshTokenRepository refreshTokenRepository;
+
+  @Mock
+  ShortenedURLRepository shortenedURLRepository;
+
   @InjectMocks ExceptionServiceImpl exceptionService;
 
   @Test
@@ -139,6 +155,128 @@ class ExceptionServiceImplTest {
   }
 
   @Test
+  void checkForRefreshTokenErrorsThrowsNotExists() {
+    UUID uuid = UUID.randomUUID();
+    RefreshAccessRequestDTO sampleRequest = new RefreshAccessRequestDTO(uuid);
+    ApiRequestException expected = new ApiRequestException("/api/test",
+        "Refresh Token does not exist");
+
+    when(refreshTokenRepository.findRefreshTokenById(uuid)).thenReturn(Optional.empty());
+
+    ApiRequestException actual = assertThrows(
+        ApiRequestException.class, () -> {
+          exceptionService.checkForRefreshTokenErrors(sampleRequest);
+        }
+    );
+    assertEquals(expected.getMessage(), actual.getMessage());
+  }
+
+  @Test
+  void checkForCreateShortenedUrlErrorsThrowsJwtInvalid() {
+    ShortenedUrlRequestDTO sampleRequest = new ShortenedUrlRequestDTO("https://randomLink.com");
+    String jwt = "sampleJwt";
+    ApiRequestException expected = new ApiRequestException("/api/test",
+        "Unknown Error: Invalid Token");
+
+    when(userRepository.findByEmail("sampleMail@sample.com")).thenReturn(Optional.empty());
+    when(jwtService.extractUsername(jwt)).thenReturn("sampleMail@sample.com");
+
+    ApiRequestException actual = assertThrows(ApiRequestException.class,
+        () -> {
+      exceptionService.checkForCreateShortenedUrlErrors(sampleRequest, jwt);
+    });
+    assertEquals(expected.getMessage(), actual.getMessage());
+  }
+
+  @Test
+  void checkForCreateShortenedUrlErrorsThrowsLinkInvalid() {
+    ShortenedUrlRequestDTO sampleRequest = new ShortenedUrlRequestDTO("http:randomLink.no");
+    String jwt = "sampleJwt";
+    User sampleUser = new User();
+    ApiRequestException expected = new ApiRequestException("/api/test",
+        "Please input a valid link");
+
+    when(userRepository.findByEmail("sampleMail@sample.com")).thenReturn(Optional.of(sampleUser));
+    when(jwtService.extractUsername(jwt)).thenReturn("sampleMail@sample.com");
+
+    ApiRequestException actual = assertThrows(ApiRequestException.class, () -> {
+      exceptionService.checkForCreateShortenedUrlErrors(sampleRequest, jwt);
+    });
+    assertEquals(expected.getMessage(), actual.getMessage());
+  }
+
+  @Test
+  void checkForDeleteShortenedUrlErrorsThrowsJwtInvalid() {
+    DeleteShortenedUrlRequestDTO sampleRequest = new DeleteShortenedUrlRequestDTO("1");
+    String jwt = "sampleJwt";
+    ApiRequestException expected = new ApiRequestException("/api/test",
+        "Unknown Error: Invalid Token");
+
+    when(userRepository.findByEmail("sampleMail@sample.com")).thenReturn(Optional.empty());
+    when(jwtService.extractUsername(jwt)).thenReturn("sampleMail@sample.com");
+
+    ApiRequestException actual = assertThrows(ApiRequestException.class,
+        () -> {
+          exceptionService.checkForDeleteShortenedUrlErrors(sampleRequest, jwt);
+        });
+    assertEquals(expected.getMessage(), actual.getMessage());
+  }
+
+  @Test
+  void checkForDeleteShortenedUrlErrorsThrowsLinkInaccessible() {
+    UUID randomUuid = UUID.randomUUID();
+    DeleteShortenedUrlRequestDTO sampleRequest = new DeleteShortenedUrlRequestDTO(randomUuid.toString());
+    String jwt = "sampleJwt";
+    User sampleUser = new User();
+    ApiRequestException expected = new ApiRequestException("/api/test",
+        "Only links created by you can be deleted");
+
+    when(userRepository.findByEmail("sampleMail@sample.com")).thenReturn(Optional.of(sampleUser));
+    when(jwtService.extractUsername(jwt)).thenReturn("sampleMail@sample.com");
+    when(shortenedURLRepository.findById(randomUuid)).thenReturn(Optional.empty());
+
+    ApiRequestException actual = assertThrows(ApiRequestException.class,
+        () -> {
+          exceptionService.checkForDeleteShortenedUrlErrors(sampleRequest, jwt);
+        });
+    assertEquals(expected.getMessage(), actual.getMessage());
+  }
+
+  @Test
+  void checkForVerifyEmailErrorsThrowsUserNotFound() {
+    String token = "randomToken";
+    ApiRequestException expected = new ApiRequestException("/api/test",
+        "User not found");
+
+    when(userRepository.findByEmail("randomMail")).thenReturn(Optional.empty());
+    when(jwtService.extractUsername(token)).thenReturn("randomMail");
+
+    ApiRequestException actual = assertThrows(ApiRequestException.class,
+        () -> {
+          exceptionService.checkForVerifyEmailErrors(token);
+        });
+    assertEquals(expected.getMessage(), actual.getMessage());
+  }
+
+  @Test
+  void checkForVerifyEmailErrorsThrowsUserAlreadyVerified() {
+    String token = "randomToken";
+    User randomUser = new User();
+    randomUser.setVerified(true);
+    ApiRequestException expected = new ApiRequestException("/api/test",
+        "User has already been verified");
+
+    when(userRepository.findByEmail("randomMail")).thenReturn(Optional.of(randomUser));
+    when(jwtService.extractUsername(token)).thenReturn("randomMail");
+
+    ApiRequestException actual = assertThrows(ApiRequestException.class,
+        () -> {
+          exceptionService.checkForVerifyEmailErrors(token);
+        });
+    assertEquals(expected.getMessage(), actual.getMessage());
+  }
+
+  @Test
   void isValidEmailAddressDetectsInvalidEmail() {
     String wrongEmail = "wrongemail.com";
     assertFalse(exceptionService.isValidEmailAddress(wrongEmail));
@@ -160,6 +298,18 @@ class ExceptionServiceImplTest {
   void isSafePasswordApprovesSafePassword() {
     String strongPassword = "Strong234!";
     assertTrue(exceptionService.isSafePassword(strongPassword));
+  }
+
+  @Test
+  void isValidLinkDetectsInvalidLink() {
+    String invalidLink = "https:invalid.kek";
+    assertFalse(exceptionService.isValidLink(invalidLink));
+  }
+
+  @Test
+  void isValidLinkApprovesValidLink() {
+    String validLink = "https://validlink.com";
+    assertTrue(exceptionService.isValidLink(validLink));
   }
 
 }

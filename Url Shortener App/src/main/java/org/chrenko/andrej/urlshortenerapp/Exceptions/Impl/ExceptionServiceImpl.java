@@ -198,12 +198,12 @@ public class ExceptionServiceImpl implements ExceptionService {
 
   @Override
   public void throwUsernameNotFound() {
-    throwException("User not found.");
+    throwException("User not found");
   }
 
   @Override
   public void throwUserAlreadyVerified() {
-    throwException("User has already been verified.");
+    throwException("User has already been verified");
   }
   @Override
   public void throwException(String message) {
