@@ -21,6 +21,4 @@ The Documentation was created with OpenAPI. You can view it at **/swagger/ui**.
 
 
 
-TODO:
-- Implement tests
 
