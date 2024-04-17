@@ -96,9 +96,7 @@ public class User implements UserDetails {
         ", name='" + name + '\'' +
         ", email='" + email + '\'' +
         ", password='" + password + '\'' +
-        ", role=" + role +
-        ", refreshToken=" + refreshToken.getId() +
-        ", urls=" + urls +
+        ", role=" + role.toString() +
         '}';
   }
 }
